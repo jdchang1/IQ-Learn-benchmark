@@ -112,7 +112,17 @@ def load_trajectories(expert_location: str,
     if os.path.isfile(expert_location):
         # Load data from single file.
         with open(expert_location, 'rb') as f:
-            trajs = read_file(expert_location, f)
+            expert_trajs = read_file(expert_location, f)
+
+        lengths = [expert_trajs[0][i].shape[0] for i in range(len(expert_trajs[0]))]
+        rewards = [np.zeros(l) for l in lengths]
+
+        trajs = {
+            "states": expert_trajs[0],
+            "actions": expert_trajs[2],
+            "rewards": rewards,
+            "lengths": lengths,
+        }
 
         rng = np.random.RandomState(seed)
         # Sample random `num_trajectories` experts.
