@@ -1,8 +1,8 @@
 # @package _global_
 
 env:
-  name: dmc_ball_in_cup_catch
-  demo: cup_catch_10.pkl #TODO
+  name: dmc_humanoid_stand
+  demo: humanoid_stand_10.pkl
   # learn_steps: 1e5
   # eval_interval: 1e3
 
@@ -20,7 +20,7 @@ expert:
 
 eval:
   policy: 
-  threshold: 4500
+  threshold: 5000
 
 agent:
   name: sac

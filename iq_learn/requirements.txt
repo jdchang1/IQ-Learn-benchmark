@@ -11,4 +11,6 @@ wandb
 opencv-python==4.5.1.48
 atari-py==0.2.6
 gym_minigrid==1.0.2
-mujoco_py==2.0.2
+# mujoco_py==2.0.2
+# dm_control
+# git+git://github.com/denisyarats/dmc2gym.git

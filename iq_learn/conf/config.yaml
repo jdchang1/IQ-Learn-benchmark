@@ -1,5 +1,5 @@
 exp_name: ''
-project_name: ${env.name}
+project_name: iq_learn
 
 cuda_deterministic: False
 device: ??? # to be specified later
@@ -53,6 +53,9 @@ eval_only: False
 offline: False
 # Number of actor updates per env step
 num_actor_updates: 1
+
+# wandb logging
+wandb: true
 
 defaults:
   - method: iq

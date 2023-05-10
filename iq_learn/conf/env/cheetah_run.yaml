@@ -2,7 +2,8 @@
 
 env:
   name: dmc_cheetah_run
-  demo: HalfCheetah-v2_25.pkl #TODO:
+  demo: cheetah_run_10.pkl #TODO: 50 expert trajectories
+
   # learn_steps: 1e5
   # eval_interval: 1e3
 

@@ -71,6 +71,9 @@ class ExpertDataset(Dataset):
 
             self.get_idx.append((traj_idx, i))
             i += 1
+        
+        for k, v in self.trajectories.items():
+            print(f'{k}: {len(v)}')
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
@@ -111,19 +114,28 @@ def load_trajectories(expert_location: str,
     """
     if os.path.isfile(expert_location):
         # Load data from single file.
+        
         with open(expert_location, 'rb') as f:
             expert_trajs = read_file(expert_location, f)
-
-        lengths = [expert_trajs[0][i].shape[0] for i in range(len(expert_trajs[0]))]
-        rewards = [np.zeros(l) for l in lengths]
+        
+        lengths = [expert_trajs[0][i].shape[0] - 1 for i in range(len(expert_trajs[0]))]
+        rewards = [np.zeros(l) for l in lengths] # dummy rewards, not used
+        dones = [np.zeros(l) for l in lengths] # never done
+        
+        # create correct data
+        states = [expert_trajs[0][i][:-1] for i in range(len(expert_trajs[0]))]
+        actions = [expert_trajs[2][i][:-1] for i in range(len(expert_trajs[1]))]
+        next_states = [expert_trajs[0][i][1:] for i in range(len(expert_trajs[0]))]
 
         trajs = {
-            "states": expert_trajs[0],
-            "actions": expert_trajs[2],
+            "states": states,
+            "actions": actions,
+            "next_states": next_states,
             "rewards": rewards,
             "lengths": lengths,
+            "dones": dones
         }
-
+        
         rng = np.random.RandomState(seed)
         # Sample random `num_trajectories` experts.
         perm = np.arange(len(trajs["states"]))

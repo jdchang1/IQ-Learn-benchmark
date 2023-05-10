@@ -28,6 +28,10 @@ from utils.utils import eval_mode, average_dicts, get_concat_samples, evaluate, 
 from utils.logger import Logger
 from iq import iq_loss
 
+
+# setting variables
+# os.environ["MKL_SERVICE_FORCE_INTEL"] = "1"
+# os.environ["MUJOCO_GL"] = "egl"
 torch.set_num_threads(2)
 
 
@@ -41,8 +45,19 @@ def get_args(cfg: DictConfig):
 @hydra.main(config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     args = get_args(cfg)
-    wandb.init(project=args.project_name, entity='iq-learn',
-               sync_tensorboard=True, reinit=True, config=args)
+    
+    if cfg.wandb:
+        if args.env.name.startswith('dmc_'):
+            env_name = args.env.name[4:]
+        else:
+            env_name = args.env.name
+        
+        group = f'{env_name}_{args.expert.demos}'
+        ts = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+        name = f'{ts}_iq_{args.seed}'
+        wandb.init(project=args.project_name, entity='boosting',
+                group=group, name=name, sync_tensorboard=True,
+                reinit=True, config=args)
 
     # set seeds
     random.seed(args.seed)
@@ -77,7 +92,7 @@ def main(cfg: DictConfig):
             print("=> loading pretrain '{}'".format(args.pretrain))
             agent.load(pretrain_path)
         else:
-            print("[Attention]: Did not find checkpoint {}".format(args.pretrain))
+            print("[ATTENTION]: Did not find checkpoint {}".format(args.pretrain))
 
     # Load expert data
     expert_memory_replay = Memory(REPLAY_MEMORY//2, args.seed)
@@ -147,7 +162,8 @@ def main(cfg: DictConfig):
                 if returns > best_eval_returns:
                     # Store best eval returns
                     best_eval_returns = returns
-                    wandb.run.summary["best_returns"] = best_eval_returns
+                    if cfg.wandb:
+                        wandb.run.summary["best_returns"] = best_eval_returns
                     save(agent, epoch, args, output_dir='results_best')
 
             # only store done true when episode finishes without hitting timelimit (allow infinite bootstrap)
@@ -165,7 +181,8 @@ def main(cfg: DictConfig):
                 learn_steps += 1
                 if learn_steps == LEARN_STEPS:
                     print('Finished!')
-                    wandb.finish()
+                    if cfg.wandb:
+                        wandb.finish()
                     return
 
                 ######
